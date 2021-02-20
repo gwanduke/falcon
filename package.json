@@ -1,11 +1,11 @@
 {
-  "name": "falcon-box",
+  "name": "falcon",
   "version": "0.1.0",
-  "description": "This hunts network requests and collects them in the box. Then you can check hunted requests as test code or json format.",
+  "description": "This chrome extension collects network requests and you can copy them into test code or json format.",
   "author": {
     "email": "gwanduke@gmail.com",
     "name": "gwanduke",
-    "url": "https://github.com/gwanduke/falcon-box"
+    "url": "https://github.com/gwanduke/falcon"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

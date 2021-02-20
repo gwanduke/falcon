@@ -1,1 +1,1 @@
-chrome.devtools.panels.create("FalconBox", "", "panel.html");
+chrome.devtools.panels.create("Falcon", "", "panel.html");

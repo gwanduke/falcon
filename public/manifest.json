@@ -1,6 +1,6 @@
 {
-  "name": "FalconBox",
-  "description": "This hunts network requests and collects them in the box. Then you can check hunted requests as test code or json format.",
+  "name": "Falcon, the network tracker",
+  "description": "This chrome extension collects network requests and you can copy them into test code or json format.",
   "version": "1.0",
   "manifest_version": 3,
   "permissions": [],

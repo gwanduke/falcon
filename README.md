@@ -1,5 +1,4 @@
-# 🦅 Falcon Box
+# 🦅 Falcon, the network tracker
 
-This hunts network requests and collects them in the box. Then you can check hunted requests as test code or json format.
-
-네트워크 요청을 사냥해 박스에 모읍니다. 사냥된 요청은 테스트 코드나 JSON 형식으로 제공됩니다.
+- This chrome extension collects network requests and you can copy them into test code or JSON format.
+- 이 크롬 익스텐션은 네트워크 요청을 모아서 테스트 코드 또는 JSON 포맷으로 복사할 수 있도록 해줍니다.
