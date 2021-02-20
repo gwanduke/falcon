@@ -1,0 +1,42 @@
+body {
+  padding: 15px !important;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.App_contents {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.Content {
+  flex-shrink: 0;
+  overflow-x: scroll;
+  flex-grow: 1;
+}
+
+.textarea {
+  width: 100%;
+  word-break: break-all;
+  white-space: break-spaces;
+  display: block;
+}
+
+tr {
+  cursor: pointer;
+  color: #666;
+}
+
+tr:hover {
+  color: #000;
+}
+
+hr {
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
+}
