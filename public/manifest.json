@@ -4,5 +4,6 @@
   "version": "1.0",
   "manifest_version": 3,
   "permissions": [],
-  "devtools_page": "devtools.html"
+  "devtools_page": "devtools.html",
+  "icons": { "16": "icon16.png", "48": "icon48.png", "128": "icon128.png" }
 }
