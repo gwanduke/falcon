@@ -3,7 +3,6 @@ import {
   Box,
   Checkbox,
   Stack,
-  useToast,
   HStack,
   Divider,
   Heading,
@@ -16,6 +15,12 @@ import {
   Tbody,
   Tr,
   Td,
+  AlertIcon,
+  Alert,
+  FormControl,
+  FormLabel,
+  Switch,
+  Flex,
 } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/react";
 import "./App.css";
@@ -38,6 +43,7 @@ const getId = () => {
 const App = () => {
   const [requests, setRequests] = React.useState<RequestInfo[]>([]);
   const [currentId, setCurrentId] = React.useState<number | null>(null);
+  const [logEnabled, setLogEnabled] = React.useState<boolean>(true);
   const [formatType, setFormatType] = React.useState<FormatType>("json");
   const [whitelistMimeTypes, setWhitelistMimeTypes] = React.useState<string[]>([
     "json",
@@ -66,7 +72,7 @@ const App = () => {
   const format = getFormatter(formatType);
 
   React.useEffect(() => {
-    chrome.devtools.network.onRequestFinished.addListener((request) => {
+    const recordRequest = (request) => {
       const id = getId();
       const response = request.response;
 
@@ -107,6 +113,15 @@ const App = () => {
           ];
         });
       });
+    };
+
+    chrome.storage.onChanged.addListener((changes) => {
+      setLogEnabled(changes.enabled.newValue as boolean);
+      if (changes.enabled.newValue) {
+        chrome.devtools.network.onRequestFinished.addListener(recordRequest);
+      } else {
+        chrome.devtools.network.onRequestFinished.removeListener(recordRequest);
+      }
     });
   }, []);
 
@@ -114,117 +129,161 @@ const App = () => {
     setCurrentId(id);
   };
 
+  const disabledAlert = logEnabled ? null : (
+    <>
+      <Alert status="error">
+        <AlertIcon />
+        비활성 상태, 요청을 수집하고 있지 않습니다.
+      </Alert>
+      <Divider />
+    </>
+  );
+  const allChecked = filteredRequests.every((r) => r.checked);
+
   return (
     <div className="App">
-      <div>
-        <Box>
+      {disabledAlert}
+      <Box>
+        <HStack>
+          <FormControl display="flex" alignItems="center">
+            <FormLabel htmlFor="logEnabled" mb="0">
+              Logging?
+            </FormLabel>
+            <Switch
+              id="logEnabled"
+              isChecked={logEnabled}
+              onChange={() => {
+                chrome.storage.sync.set({
+                  enabled: !logEnabled,
+                });
+              }}
+            />
+          </FormControl>
           <Button
             leftIcon={<FaTrash />}
             colorScheme="red"
             size="sm"
+            flexShrink={0}
             onClick={() => {
               setRequests([]);
               setCurrentId(null);
             }}
           >
-            기록된 요청 삭제
+            Reset Logs
           </Button>
-        </Box>
-        <Divider />
-        <Box>
-          <Heading size="md">필터 설정</Heading>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (mimeType) {
-                setWhitelistMimeTypes((prev) => {
-                  return [...prev, mimeType];
-                });
-                setMimeType("");
-              }
-            }}
-          >
-            <HStack>
-              <Input
-                placeholder="Whitelist MIME type 추가"
-                size="sm"
-                value={mimeType}
-                onChange={(e) => {
-                  setMimeType(e.target.value);
-                }}
-              />
-              <Button
-                colorScheme="teal"
-                size="sm"
-                onClick={() => {
-                  if (mimeType) {
-                    setWhitelistMimeTypes((prev) => {
-                      return [...prev, mimeType];
-                    });
-                    setMimeType("");
-                  }
-                }}
-              >
-                Add
-              </Button>
-            </HStack>
-          </form>
-          {whitelistMimeTypes.map((mimeType) => (
-            <Tag
-              size={"md"}
-              key={"md"}
-              borderRadius="full"
-              variant="solid"
-              colorScheme="green"
-            >
-              <TagLabel>{mimeType}</TagLabel>
-              <TagCloseButton
-                onClick={() => {
+        </HStack>
+      </Box>
+      <Divider />
+      <Box>
+        <Heading size="md">✂️ Filters</Heading>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (mimeType) {
+              setWhitelistMimeTypes((prev) => {
+                return [...prev, mimeType];
+              });
+              setMimeType("");
+            }
+          }}
+        >
+          <HStack>
+            <Input
+              placeholder="Whitelist MIME type 추가"
+              size="sm"
+              value={mimeType}
+              onChange={(e) => {
+                setMimeType(e.target.value);
+              }}
+            />
+            <Button
+              colorScheme="gray"
+              size="sm"
+              onClick={() => {
+                if (mimeType) {
                   setWhitelistMimeTypes((prev) => {
-                    return prev.filter(
-                      (whitelistMimeType) => whitelistMimeType !== mimeType
-                    );
+                    return [...prev, mimeType];
                   });
-                }}
-              />
-            </Tag>
-          ))}
-        </Box>
-
-        <Divider />
-        <Box>
-          <Heading size="md">결과 타입</Heading>
-          <RadioGroup
-            onChange={(v: FormatType) => setFormatType(v)}
-            value={formatType}
+                  setMimeType("");
+                }
+              }}
+            >
+              Add
+            </Button>
+          </HStack>
+        </form>
+        {whitelistMimeTypes.map((mimeType) => (
+          <Tag
+            size={"md"}
+            key={"md"}
+            borderRadius="full"
+            variant="solid"
+            colorScheme="green"
           >
-            <Stack direction="row">
-              <Radio value="msw">msw handlers</Radio>
-              <Radio value="json">JSON</Radio>
-            </Stack>
-          </RadioGroup>
-        </Box>
-        <Divider />
-        <Box>
+            <TagLabel>{mimeType}</TagLabel>
+            <TagCloseButton
+              onClick={() => {
+                setWhitelistMimeTypes((prev) => {
+                  return prev.filter(
+                    (whitelistMimeType) => whitelistMimeType !== mimeType
+                  );
+                });
+              }}
+            />
+          </Tag>
+        ))}
+      </Box>
+
+      <Divider />
+      <Box>
+        <Heading size="md" mb="1">
+          🧩 Result Format
+        </Heading>
+        <RadioGroup
+          onChange={(v: FormatType) => setFormatType(v)}
+          value={formatType}
+        >
+          <Stack direction="row">
+            <Radio value="msw">msw handlers</Radio>
+            <Radio value="json">JSON</Radio>
+          </Stack>
+        </RadioGroup>
+      </Box>
+      <Divider />
+      <Box>
+        <Heading size="md" mb="1">
+          Logged Requests
+        </Heading>
+        <Box mb="2" mt="2">
           <Button
             leftIcon={<BsLightningFill />}
-            colorScheme="teal"
+            colorScheme="blue"
             size="sm"
             onClick={() => {
               onOpen();
             }}
           >
-            선택한 요청 전체를 배열로 만들기
+            선택한 요청 전체를 배열로 만들기 (
+            {filteredRequests.filter((request) => request.checked).length}/
+            {filteredRequests.length})
           </Button>
-          ({filteredRequests.filter((request) => request.checked).length}/
-          {filteredRequests.length})
         </Box>
-      </div>
-      <div className="App_contents">
         <Table variant="striped" colorScheme="gray" size="sm" width="full">
           <Thead>
             <Tr>
-              <Th>선택</Th>
+              <Th>
+                <Checkbox
+                  isChecked={allChecked}
+                  onChange={() => {
+                    setRequests((prev) => {
+                      return prev.map((rr) => ({
+                        ...rr,
+                        checked: !allChecked,
+                      }));
+                    });
+                  }}
+                />
+              </Th>
               <Th>Method</Th>
               <Th>URL</Th>
             </Tr>
@@ -254,7 +313,7 @@ const App = () => {
             ))}
           </Tbody>
         </Table>
-      </div>
+      </Box>
       <ItemCopyModal
         isOpen={!!currentRequest}
         onClose={() => {

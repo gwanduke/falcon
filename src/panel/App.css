@@ -8,18 +8,6 @@ body {
   height: 100%;
 }
 
-.App_contents {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.Content {
-  flex-shrink: 0;
-  overflow-x: scroll;
-  flex-grow: 1;
-}
-
 .textarea {
   width: 100%;
   word-break: break-all;

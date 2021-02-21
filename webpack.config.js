@@ -6,6 +6,8 @@ const config = {
   entry: {
     devtools: path.join(__dirname, "src/devtools.ts"),
     panel: path.join(__dirname, "src/panel.tsx"),
+    popup: path.join(__dirname, "src/popup.ts"),
+    background: path.join(__dirname, "src/background.ts"),
   },
   output: { path: path.join(__dirname, "dist"), filename: "[name].js" },
   module: {
